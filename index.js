@@ -10,77 +10,78 @@
  */
 
 const allWagesFor = function () {
-    const eligibleDates = this.timeInEvents.map(function (e) {
-        return e.date;
-    });
+	const eligibleDates = this.timeInEvents.map(function (e) {
+		return e.date
+	})
+	// console.log(eligibleDates)
+	const payable = eligibleDates.reduce(
+		function (memo, d) {
+			return memo + wagesEarnedOnDate.call(this, d)
+		}.bind(this),
+		0
+	) // <== Hm, why did we need to add bind() there? We'll discuss soon!
 
-    const payable = eligibleDates.reduce(
-        function (memo, d) {
-            return memo + wagesEarnedOnDate.call(this, d);
-        }.bind(this),
-        0
-    ); // <== Hm, why did we need to add bind() there? We'll discuss soon!
-
-    return payable;
-};
+	return payable
+}
 
 function createEmployeeRecord(employee) {
-    const employeeRecord = [];
-    employeeRecord.firstName = employee[0];
-    employeeRecord.familyName = employee[1];
-    employeeRecord.title = employee[2];
-    employeeRecord.payPerHour = employee[3];
-    employeeRecord.timeInEvents = [];
-    employeeRecord.timeOutEvents = [];
-    // console.log(employeeRecord);
-    return employeeRecord;
+	const employeeRecord = []
+	employeeRecord.firstName = employee[0]
+	employeeRecord.familyName = employee[1]
+	employeeRecord.title = employee[2]
+	employeeRecord.payPerHour = employee[3]
+	employeeRecord.timeInEvents = []
+	employeeRecord.timeOutEvents = []
+	return employeeRecord
 }
 
 function createEmployeeRecords(records) {
-    const employeeRecords = [];
-    for (const data of records) {
-        employeeRecords.push(createEmployeeRecord(data));
-    }
-    return employeeRecords;
+	return records.map(createEmployeeRecord)
 }
 
 function createTimeInEvent(dateTime) {
-    this.timeInEvents.push({ type: "TimeIn" });
-    const timeIn = this.timeInEvents[0];
-    const timeInDate = dateTime.split(" ")[0];
-    const timeInHour = parseInt(dateTime.split(" ")[1]);
-    timeIn.date = timeInDate;
-    timeIn.hour = timeInHour;
-    return this;
+	this.timeInEvents.push({ type: "TimeIn" })
+	const timeIn = this.timeInEvents[0]
+	const timeInDate = dateTime.split(" ")[0]
+	const timeInHour = parseInt(dateTime.split(" ")[1])
+	timeIn.date = timeInDate
+	timeIn.hour = timeInHour
+	return this
 }
 
 function createTimeOutEvent(dateTime) {
-    this.timeOutEvents.push({ type: "TimeOut" });
-    const timeOut = this.timeOutEvents[0];
-    const timeOutDate = dateTime.split(" ")[0];
-    const timeOutHour = parseInt(dateTime.split(" ")[1]);
-    timeOut.date = timeOutDate;
-    timeOut.hour = timeOutHour;
-    return this;
+	this.timeOutEvents.push({ type: "TimeOut" })
+	const timeOut = this.timeOutEvents[0]
+	const timeOutDate = dateTime.split(" ")[0]
+	const timeOutHour = parseInt(dateTime.split(" ")[1])
+	timeOut.date = timeOutDate
+	timeOut.hour = timeOutHour
+	return this
 }
 
 function hoursWorkedOnDate(workDate) {
-    for (let i = 0; i < this.timeInEvents.length; i++) {
-        if (this.timeInEvents[i].date === workDate) {
-            const hours =
-                (this.timeOutEvents[i].hour - this.timeInEvents[i].hour) / 100;
-            return hours;
-        }
-    }
+	const timeIn = this.timeInEvents.find((timeInArr) => workDate === timeInArr.date)
+	const timeOut = this.timeOutEvents.find((timeOutArr) => workDate === timeOutArr.date)
+	return (timeOut.hour - timeIn.hour) / 100
+	// for (let i = 0; i < this.timeInEvents.length; i++) {
+	// 	if (this.timeInEvents[i].date === workDate) {
+	// 		const hours = (this.timeOutEvents[i].hour - this.timeInEvents[i].hour) / 100
+	// 		return hours
+	// 	}
+	// }
 }
 
 function wagesEarnedOnDate(workDate) {
-    const hoursWorked = hoursWorkedOnDate.call(workDate);
-    for (let i = 0; i < this.timeInEvents.length; i++) {
-        if (this.timeInEvents[i].date === workDate) {
-            console.log(this.payPerHour * hoursWorked);
-        }
-    }
-    // console.log(this);
-    // console.log(workDate);
+	return hoursWorkedOnDate.call(this, workDate) * this.payPerHour
+}
+
+function calculatePayroll(array) {
+	let payroll = array.reduce((acc, cur) => {
+		return acc + allWagesFor.call(cur)
+	}, 0)
+}
+
+function findEmployeeByFirstName(collection, firstNameString) {
+	const employee = collection.find((arr) => arr.firstName === firstNameString)
+	return employee
 }
