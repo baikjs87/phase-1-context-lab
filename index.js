@@ -13,7 +13,6 @@ const allWagesFor = function () {
 	const eligibleDates = this.timeInEvents.map(function (e) {
 		return e.date
 	})
-	// console.log(eligibleDates)
 	const payable = eligibleDates.reduce(
 		function (memo, d) {
 			return memo + wagesEarnedOnDate.call(this, d)
@@ -40,22 +39,22 @@ function createEmployeeRecords(records) {
 }
 
 function createTimeInEvent(dateTime) {
-	this.timeInEvents.push({ type: "TimeIn" })
-	const timeIn = this.timeInEvents[0]
-	const timeInDate = dateTime.split(" ")[0]
-	const timeInHour = parseInt(dateTime.split(" ")[1])
-	timeIn.date = timeInDate
-	timeIn.hour = timeInHour
+	const timeObj = {
+		type: "TimeIn",
+		date: dateTime.split(" ")[0],
+		hour: parseInt(dateTime.slice(-4), 10),
+	}
+	this.timeInEvents.push(timeObj)
 	return this
 }
 
 function createTimeOutEvent(dateTime) {
-	this.timeOutEvents.push({ type: "TimeOut" })
-	const timeOut = this.timeOutEvents[0]
-	const timeOutDate = dateTime.split(" ")[0]
-	const timeOutHour = parseInt(dateTime.split(" ")[1])
-	timeOut.date = timeOutDate
-	timeOut.hour = timeOutHour
+	const timeObj = {
+		type: "TimeOut",
+		date: dateTime.split(" ")[0],
+		hour: parseInt(dateTime.slice(-4), 10),
+	}
+	this.timeOutEvents.push(timeObj)
 	return this
 }
 
@@ -63,25 +62,20 @@ function hoursWorkedOnDate(workDate) {
 	const timeIn = this.timeInEvents.find((timeInArr) => workDate === timeInArr.date)
 	const timeOut = this.timeOutEvents.find((timeOutArr) => workDate === timeOutArr.date)
 	return (timeOut.hour - timeIn.hour) / 100
-	// for (let i = 0; i < this.timeInEvents.length; i++) {
-	// 	if (this.timeInEvents[i].date === workDate) {
-	// 		const hours = (this.timeOutEvents[i].hour - this.timeInEvents[i].hour) / 100
-	// 		return hours
-	// 	}
-	// }
 }
 
 function wagesEarnedOnDate(workDate) {
 	return hoursWorkedOnDate.call(this, workDate) * this.payPerHour
 }
 
+function findEmployeeByFirstName(collection, firstNameString) {
+	const employee = collection.find((arr) => arr.firstName === firstNameString)
+	return employee
+}
+
 function calculatePayroll(array) {
 	let payroll = array.reduce((acc, cur) => {
 		return acc + allWagesFor.call(cur)
 	}, 0)
-}
-
-function findEmployeeByFirstName(collection, firstNameString) {
-	const employee = collection.find((arr) => arr.firstName === firstNameString)
-	return employee
+	return payroll
 }
